@@ -1,0 +1,36 @@
+{
+    "id":"2462079046",
+    "name": "张三",
+    "age":"22",
+    "weight":120,
+    "six":false,
+    "address":{
+        "country": "中国",
+        "province": "湖南省"
+    },
+    "addressA":{
+        "country": "中国",
+        "province": "台湾省"
+    },
+    "courses":[
+        {
+            "name": "物理",
+            "duration": 30
+        },
+        {
+            "name": "化学",
+            "duration": 45
+        }
+    ],
+    "coursesA":[
+        {
+            "name": "物理",
+            "duration": 30
+        },
+        {
+            "name": "化学",
+            "duration": 45
+        }
+    ],
+    "birthday": "1996-03-28 05:27:31.050"
+}
