@@ -22,11 +22,20 @@
     unsigned int count = 0;
     Ivar *ivarList = class_copyIvarList([object class], &count);
     
-    // 自定义映射的代理里(注意这里，因为有递归的存在，所以这里只第一次拿)
+
+    /**
+     1.收集当前的警告
+     2.忽略在arc 环境下performSelector产生的 leaks 的警告
+     3.弹出所有的警告
+     */
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+    // 通过runtime 获取类方法(注意这里，因为有递归的存在，所以每次只拿本类的映射)
     NSDictionary *mapDic = nil;
-    if ([self respondsToSelector:@selector(QSMapping)]) {
-        mapDic = [self performSelector:@selector(QSMapping)];
+    if ([[self class] respondsToSelector:NSSelectorFromString(@"QSMapping")]) {
+        mapDic = [[self class] performSelector:NSSelectorFromString(@"QSMapping")];
     }
+    #pragma clang diagnostic pop
     
     // 遍历所有成员变量
     for (unsigned int i = 0; i < count; i ++) {
@@ -131,8 +140,23 @@
     // 用于存取当前转换后的值
     NSMutableDictionary *resultDic = [[NSMutableDictionary alloc] init];
     
+    // 通过runtime获取模型里的所有成员变量
     unsigned int count;
     Ivar *ivarList = class_copyIvarList([self class], &count);
+    
+    /**
+     1.收集当前的警告
+     2.忽略在arc 环境下performSelector产生的 leaks 的警告
+     3.弹出所有的警告
+     */
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+    // 通过runtime 获取类方法(注意这里，因为有递归的存在，所以每次只拿本类的映射)
+    NSDictionary *mapDic = nil;
+    if ([[self class] respondsToSelector:NSSelectorFromString(@"QSMapping")]) {
+        mapDic = [[self class] performSelector:NSSelectorFromString(@"QSMapping")];
+    }
+    #pragma clang diagnostic pop
     
     // 遍历属性
     for (unsigned int i = 0; i < count; i ++) {
@@ -155,7 +179,6 @@
         id ivarValue = [self valueForKey:ivarName];
         
         // ==> 判断为数组中元素是对象
-        
         if ([ivarType isEqualToString:@"NSArray"] || [ivarType isEqualToString:@"NSMutableArray"]) {
             
             // 把传化后的元素存起来
@@ -178,17 +201,33 @@
             }
         }
         
-        // ==> 是对象 不含有“NS” && 继承NSObject(即：不是值类型)
-        Class subClass = NSClassFromString(ivarType);
-        if (![ivarType hasPrefix:@"NS"] && [subClass isKindOfClass:[NSObject class]]) {
-            ivarValue = [ivarValue dicWithObject];
+        // ==> 日期 且 自定义有日期格式
+        else if ([ivarType isEqualToString:@"NSDate"] &&
+                 [mapDic.allKeys containsObject:ivarName]) {
+            
+            id mapValue = [mapDic valueForKey:ivarName];
+            if (mapValue && ivarValue) {
+                NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+                [formatter setDateFormat:mapValue];
+                [formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:8]];//解决8小时时间差问题
+                ivarValue = [formatter stringFromDate:ivarValue];
+            }
+        }
+        else {
+            // ==> 是对象 不含有“NS” && 继承NSObject(即：不是值类型)
+            Class subClass = NSClassFromString(ivarType);
+            if (![ivarType hasPrefix:@"NS"] && [subClass isKindOfClass:[NSObject class]]) {
+                ivarValue = [ivarValue dicWithObject];
+            }
+            
+            // ==> 对自定义的映射更改 放在最后改，因为优先级高
+            if ([mapDic.allKeys containsObject:ivarName]) {
+                ivarName = [mapDic valueForKey:ivarName];
+            }
         }
         
         [resultDic setValue:ivarValue forKey:ivarName];
     }
-    
-    // 判断属性类型，根据类型来进行判断
-    
     free(ivarList);
     return resultDic;
 }

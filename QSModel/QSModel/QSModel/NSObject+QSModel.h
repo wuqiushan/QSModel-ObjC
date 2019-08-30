@@ -17,11 +17,4 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@protocol QSModelDelegate <NSObject>
-
-@optional
-+ (NSDictionary *)QSMapping;
-
-@end
-
 NS_ASSUME_NONNULL_END
