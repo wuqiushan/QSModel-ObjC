@@ -121,8 +121,9 @@
                                                               error:&error];
     NSLog(@"转换前 json文件：\n %@", jsonDic);
     
-    NSObject *object = [Student modelWithDic:jsonDic];
-    NSDictionary *resultDic = [object dicWithObject];
+    Student *student = [Student qs_modelWithDictionary:jsonDic];
+    NSDictionary *resultDic = [student qs_modelToDictionary];
+    
     NSLog(@"转换后 json文件：\n %@", resultDic);
 }
 

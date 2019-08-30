@@ -13,7 +13,7 @@
 
 
 #pragma mark - 字典 >>> 模型
-+ (instancetype)modelWithDic:(NSDictionary *)dic {
++ (instancetype)qs_modelWithDictionary:(NSDictionary *)dic {
     
     if (!dic) { return nil; }
     NSObject *object = [[self alloc] init];
@@ -22,7 +22,6 @@
     unsigned int count = 0;
     Ivar *ivarList = class_copyIvarList([object class], &count);
     
-
     /**
      1.收集当前的警告
      2.忽略在arc 环境下performSelector产生的 leaks 的警告
@@ -74,7 +73,7 @@
             if ([ivarValue isKindOfClass:[NSDictionary class]]) {
                 Class subClass = NSClassFromString(ivarType);
                 if (subClass) {
-                    ivarValue = [subClass modelWithDic:ivarValue];
+                    ivarValue = [subClass qs_modelWithDictionary:ivarValue];
                 }
             }
         }
@@ -95,7 +94,7 @@
                     if (element && [element isKindOfClass:[NSDictionary class]]) {
                         Class subClass = NSClassFromString(className);
                         if (subClass) {
-                            [subObjectList addObject:[subClass modelWithDic:element]];
+                            [subObjectList addObject:[subClass qs_modelWithDictionary:element]];
                         }
                     }
                 }
@@ -133,7 +132,7 @@
 }
 
 #pragma mark - 模型 >>> 字典
-- (NSDictionary *)dicWithObject {
+- (NSDictionary *)qs_modelToDictionary {
     
     if (!self) { return nil; }
     
@@ -194,7 +193,7 @@
                     
                     //如果是对象的话，就遍历
                     for (id element in ivarValue) {
-                        [subObjectList addObject:[element dicWithObject]];
+                        [subObjectList addObject:[element qs_modelToDictionary]];
                     }
                     ivarValue = subObjectList;
                 }
@@ -217,7 +216,7 @@
             // ==> 是对象 不含有“NS” && 继承NSObject(即：不是值类型)
             Class subClass = NSClassFromString(ivarType);
             if (![ivarType hasPrefix:@"NS"] && [subClass isKindOfClass:[NSObject class]]) {
-                ivarValue = [ivarValue dicWithObject];
+                ivarValue = [ivarValue qs_modelToDictionary];
             }
             
             // ==> 对自定义的映射更改 放在最后改，因为优先级高

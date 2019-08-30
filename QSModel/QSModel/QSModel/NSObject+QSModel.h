@@ -12,8 +12,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface NSObject (QSModel)
 
-+ (instancetype)modelWithDic:(NSDictionary *)dic;
-- (NSDictionary *)dicWithObject;
++ (instancetype)qs_modelWithDictionary:(NSDictionary *)dic;
++ (instancetype)qs_modelWithString:(NSString *)str;
++ (instancetype)qs_modelWithData:(NSData *)data;
+
+- (NSDictionary *)qs_modelToDictionary;
+- (NSString *)qs_modelToJSONString;
+- (NSData *)qs_modelToJSONData;
+
 
 @end
 
