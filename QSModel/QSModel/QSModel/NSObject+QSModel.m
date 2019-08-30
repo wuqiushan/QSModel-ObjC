@@ -12,7 +12,7 @@
 @implementation NSObject (QSModel)
 
 
-#pragma mark - 字典 >>> 模型
+#pragma mark - NSDictionary <=> Model
 + (instancetype)qs_modelWithDictionary:(NSDictionary *)dic {
     
     if (!dic) { return nil; }
@@ -131,8 +131,7 @@
     return object;
 }
 
-#pragma mark - 模型 >>> 字典
-- (NSDictionary *)qs_modelToDictionary {
+- (NSDictionary *)qs_dictionaryWithModel {
     
     if (!self) { return nil; }
     
@@ -193,7 +192,7 @@
                     
                     //如果是对象的话，就遍历
                     for (id element in ivarValue) {
-                        [subObjectList addObject:[element qs_modelToDictionary]];
+                        [subObjectList addObject:[element qs_dictionaryWithModel]];
                     }
                     ivarValue = subObjectList;
                 }
@@ -216,7 +215,7 @@
             // ==> 是对象 不含有“NS” && 继承NSObject(即：不是值类型)
             Class subClass = NSClassFromString(ivarType);
             if (![ivarType hasPrefix:@"NS"] && [subClass isKindOfClass:[NSObject class]]) {
-                ivarValue = [ivarValue qs_modelToDictionary];
+                ivarValue = [ivarValue qs_dictionaryWithModel];
             }
             
             // ==> 对自定义的映射更改 放在最后改，因为优先级高
@@ -229,6 +228,89 @@
     }
     free(ivarList);
     return resultDic;
+}
+
+#pragma mark - NSDictionary <=> NSData
+- (NSDictionary *)qs_dictionaryWithData:(NSData *)data {
+    
+    if (!data) { return nil; }
+    
+    NSError *error = nil;
+    id result = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:&error];
+    if (error || ![result isKindOfClass:[NSDictionary class]]) {
+        return nil;
+    }
+    return (NSDictionary *)result;
+}
+
+- (NSData *)qs_dataWithDictionary:(NSDictionary *)dic {
+    
+    if (!dic) { return nil; }
+    
+    NSError *error = nil;
+    NSData *data = [NSJSONSerialization dataWithJSONObject:dic options:NSJSONWritingPrettyPrinted error:&error];
+    if (error) {
+        return nil;
+    }
+    return data;
+}
+
+#pragma mark - NSString <=> NSData
+- (NSData *)qs_dataWithString:(NSString *)string {
+    
+    if (!string) { return nil; }
+    return [string dataUsingEncoding:NSUTF8StringEncoding];
+}
+
+- (NSString *)qs_stringWithData:(NSData *)data {
+    
+    if (!data) { return nil; }
+    return [[NSString alloc] initWithData:data encoding: NSUTF8StringEncoding];
+}
+
+#pragma mark - NSString <=> NSDictionary
+- (NSDictionary *)qs_dictionaryWithString:(NSString *)string {
+    
+    NSData *data = [self qs_dataWithString:string];
+    NSDictionary *dic = [self qs_dictionaryWithData:data];
+    return dic;
+}
+
+- (NSString *)qs_stringWithDictionary:(NSDictionary *)dic {
+    
+    NSData *data = [self qs_dataWithDictionary:dic];
+    NSString *string = [self qs_stringWithData:data];
+    return string;
+}
+
+#pragma mark - NSString <=> Model
++ (instancetype)qs_modelWithString:(NSString *)str {
+    
+    NSDictionary *dic = [self qs_dictionaryWithString:str];
+    id result = [[self class] qs_modelWithDictionary:dic];
+    return result;
+}
+
+- (NSString *)qs_stringWithModel {
+    
+    NSDictionary *dic = [[self class] qs_dictionaryWithModel];
+    NSString *string = [self qs_stringWithDictionary:dic];
+    return string;
+}
+
+#pragma mark - NSData <=> Model
++ (instancetype)qs_modelWithData:(NSData *)data {
+    
+    NSDictionary *dic = [self qs_dictionaryWithData:data];
+    id result = [[self class] qs_modelWithDictionary:dic];
+    return result;
+}
+
+- (NSData *)qs_dataWithModel {
+    
+    NSDictionary *dic = [[self class] qs_dictionaryWithModel];
+    NSData *data = [self qs_dataWithDictionary:dic];
+    return data;
 }
 
 

@@ -16,9 +16,9 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)qs_modelWithString:(NSString *)str;
 + (instancetype)qs_modelWithData:(NSData *)data;
 
-- (NSDictionary *)qs_modelToDictionary;
-- (NSString *)qs_modelToJSONString;
-- (NSData *)qs_modelToJSONData;
+- (NSDictionary *)qs_dictionaryWithModel;
+- (NSString *)qs_stringWithModel;
+- (NSData *)qs_dataWithModel;
 
 
 @end

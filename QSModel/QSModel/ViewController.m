@@ -114,17 +114,24 @@
 - (void)testQSModel {
     NSBundle *bundle = [NSBundle mainBundle];
     NSString *path = [bundle pathForResource:@"Student" ofType:@"json"];
-    NSError *error;
+    
     NSData *data = [NSData dataWithContentsOfFile:path];
+    Student *student1 = [Student qs_modelWithData:data];
+    NSDictionary *result = [student1 qs_dictionaryWithModel];
+    NSLog(@"转换%@", result);
+    
+    return;
+    NSError *error;
     NSDictionary *jsonDic = [NSJSONSerialization JSONObjectWithData:data
                                                             options:NSJSONReadingAllowFragments
                                                               error:&error];
     NSLog(@"转换前 json文件：\n %@", jsonDic);
     
     Student *student = [Student qs_modelWithDictionary:jsonDic];
-    NSDictionary *resultDic = [student qs_modelToDictionary];
+    NSDictionary *resultDic = [student qs_dictionaryWithModel];
     
     NSLog(@"转换后 json文件：\n %@", resultDic);
 }
+
 
 @end
