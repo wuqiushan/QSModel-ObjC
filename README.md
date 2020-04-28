@@ -10,7 +10,6 @@
 - (NSDictionary *)qs_dictionaryWithModel;
 - (NSString *)qs_stringWithModel;
 - (NSData *)qs_dataWithModel;
-}
 ```
 
 ### 使用方法
