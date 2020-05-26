@@ -2,9 +2,9 @@
 
 ### 概述
 此框架采用runtime打造的高效的iOS解析库，有字典转模型、模型转字典等。
-* [X]支持字典、字符串(Json结构)、NSData转模型
-* [X]支持模型转字典、字符串(Json结构)、NSData
-* [X]支持用户自定义映射字段
+* [X] 支持字典、字符串(Json结构)、NSData转模型
+* [X] 支持模型转字典、字符串(Json结构)、NSData
+* [X] 支持用户自定义映射字段
 
 ```Objective-C
 + (instancetype)qs_modelWithDictionary:(NSDictionary *)dic;
